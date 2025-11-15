@@ -20,14 +20,11 @@ import {
 
 function AppContent() {
   const { loading, error, metrics, derivedSorted, addTask, updateTask, deleteTask, undoDelete, lastDeleted, clearLastDeleted } = useTasksContext();
-
-  // Keep only one handleCloseUndo definition!
   const handleCloseUndo = useCallback(() => {
-    clearLastDeleted();
-    // Optional: debugging
+    clearLastDeleted(); // ✅ clear the deleted task when snackbar closes
     console.log("[DEBUG] Snackbar closed — lastDeleted cleared");
   }, [clearLastDeleted]);
-
+  
   const [q, setQ] = useState('');
   const [fStatus, setFStatus] = useState<string>('All');
   const [fPriority, setFPriority] = useState<string>('All');
@@ -53,22 +50,18 @@ function AppContent() {
     addTask(payload);
     setActivity(prev => [createActivity('add', `Added: ${payload.title}`), ...prev].slice(0, 50));
   }, [addTask, createActivity]);
-
   const handleUpdate = useCallback((id: string, patch: Partial<Task>) => {
     updateTask(id, patch);
     setActivity(prev => [createActivity('update', `Updated: ${Object.keys(patch).join(', ')}`), ...prev].slice(0, 50));
   }, [updateTask, createActivity]);
-
   const handleDelete = useCallback((id: string) => {
     deleteTask(id);
     setActivity(prev => [createActivity('delete', `Deleted task ${id}`), ...prev].slice(0, 50));
   }, [deleteTask, createActivity]);
-
   const handleUndo = useCallback(() => {
     undoDelete();
     setActivity(prev => [createActivity('undo', 'Undo delete'), ...prev].slice(0, 50));
   }, [undoDelete, createActivity]);
-
   return (
     <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default' }}>
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
@@ -83,26 +76,32 @@ function AppContent() {
               </Typography>
             </Box>
             <Stack direction="row" spacing={2} alignItems="center">
-              <Button variant="outlined"
-                onClick={() => downloadCSV('tasks.csv', toCSV(filtered))}>
-                Export CSV
-              </Button>
+              <Button variant="outlined" onClick={() => {
+                const csv = toCSV(filtered);
+                downloadCSV('tasks.csv', csv);
+              }}>Export CSV</Button>
               <Avatar sx={{ width: 40, height: 40 }}>{user.name.charAt(0)}</Avatar>
             </Stack>
           </Stack>
-          {loading && <Stack alignItems="center" py={6}><CircularProgress /></Stack>}
+          {loading && (
+            <Stack alignItems="center" py={6}>
+              <CircularProgress />
+            </Stack>
+          )}
           {error && <Alert severity="error">{error}</Alert>}
-          {!loading && !error &&
-            <MetricsBar metricsOverride={{
-              totalRevenue: computeTotalRevenue(filtered),
-              totalTimeTaken: filtered.reduce((s, t) => s + t.timeTaken, 0),
-              timeEfficiencyPct: computeTimeEfficiency(filtered),
-              revenuePerHour: computeRevenuePerHour(filtered),
-              averageROI: computeAverageROI(filtered),
-              performanceGrade: computePerformanceGrade(computeAverageROI(filtered)),
-            }} />
-          }
-          {!loading && !error &&
+          {!loading && !error && (
+            <MetricsBar
+              metricsOverride={{
+                totalRevenue: computeTotalRevenue(filtered),
+                totalTimeTaken: filtered.reduce((s, t) => s + t.timeTaken, 0),
+                timeEfficiencyPct: computeTimeEfficiency(filtered),
+                revenuePerHour: computeRevenuePerHour(filtered),
+                averageROI: computeAverageROI(filtered),
+                performanceGrade: computePerformanceGrade(computeAverageROI(filtered)),
+              }}
+            />
+          )}
+          {!loading && !error && (
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
               <TextField placeholder="Search by title" value={q} onChange={e => setQ(e.target.value)} fullWidth />
               <Select value={fStatus} onChange={e => setFStatus(e.target.value)} displayEmpty sx={{ minWidth: 180 }}>
@@ -117,16 +116,22 @@ function AppContent() {
                 <MenuItem value="Medium">Medium</MenuItem>
                 <MenuItem value="Low">Low</MenuItem>
               </Select>
+
             </Stack>
-          }
-          {!loading && !error &&
-            <TaskTable tasks={filtered} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
-          }
+          )}
+          {!loading && !error && (
+            <TaskTable
+              tasks={filtered}
+              onAdd={handleAdd}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+            />
+          )}
           {!loading && !error && <ChartsDashboard tasks={filtered} />}
           {!loading && !error && <AnalyticsDashboard tasks={filtered} />}
           {!loading && !error && <ActivityLog items={activity} />}
           <UndoSnackbar open={!!lastDeleted} onClose={handleCloseUndo} onUndo={handleUndo} />
-        </Stack>
+         </Stack>
       </Container>
     </Box>
   );
@@ -141,3 +146,4 @@ export default function App() {
     </UserProvider>
   );
 }
+

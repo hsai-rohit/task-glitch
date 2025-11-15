@@ -60,8 +60,8 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tasks.map(t => (
-                <TableRow key={t.id} hover onClick={() => setDetails(t)} sx={{ cursor: 'pointer' }}>
+              {tasks.map((t, i) => (
+                <TableRow key={t.id + '-' + i} hover onClick={() => setDetails(t)} sx={{ cursor: 'pointer' }}>
                   <TableCell>
                     <Stack spacing={0.5}>
                       <Typography fontWeight={600}>{t.title}</Typography>
@@ -72,8 +72,9 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
                           color="text.secondary"
                           noWrap
                           title={t.notes}
-                          dangerouslySetInnerHTML={{ __html: t.notes as unknown as string }}
-                        />
+                        >
+                          {t.notes}
+                        </Typography>
                       )}
                     </Stack>
                   </TableCell>
