@@ -76,7 +76,7 @@ TaskGlitch helps sales teams track and manage productivity using ROI (Return on 
 
 ## 📦 Production Hosting
 
-- Public live app: [https://yourname-taskglitch.vercel.app](https://yourname-taskglitch.vercel.app)
+- Public live app: [https://hsairohit-taskglitch.vercel.app](https://task-glitch-ruddy.vercel.app/)
 - Deployed using Vercel with continuous integration from `main`.
 
 ---
